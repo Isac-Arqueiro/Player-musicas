@@ -41,7 +41,14 @@
       url: "https://archive.org/download/acima-eliezer-rodrigues/Acima-Eliezer%20Rodrigues.mp3"
     }
   ];
-
+     {
+      id: "002",
+      nome: "Eu te agradeço",
+      cantor: "Cede",
+      url: "https://archive.org/embed/eu-te-agradeco/Eu%20te%20agrade%C3%A7o.mp3"
+    }
+  ];
+  
   let favoritos = JSON.parse(localStorage.getItem('favoritosMusicas')) || {};
   const player = document.getElementById('player');
   const listaMusicasEl = document.getElementById('listaMusicas');
