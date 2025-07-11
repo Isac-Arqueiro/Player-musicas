@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Biblioteca Musical Moderna</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9fdf7;
+    color: #333;
+    margin: 0; padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #2a7a2a;
+    margin-bottom: 15px;
+  }
+  #busca {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 20px auto;
+    padding: 12px 15px;
+    font-size: 17px;
+    border-radius: 10px;
+    border: 1.5px solid #4caf50;
+    display: block;
+    box-sizing: border-box;
+  }
+  #listaMusicas, #listaFavoritos {
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+  }
+  .musica {
+    background: #eaf3ea;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    box-shadow: 1px 2px 5px rgba(42, 122, 42, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  .musica:hover {
+    background: #d1e7d1;
+  }
+  .musica-info {
+    flex: 1;
+  }
+  .musica-nome {
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 0 5px 0;
+  }
+  .musica-cantor {
+    font-size: 14px;
+    color: #4a774a;
+  }
+  button.fav-btn {
+    background: #4caf50;
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.fav-btn:hover {
+    background: #388e3c;
+  }
+  audio {
+    display: block;
+    margin: 0 auto 30px auto;
+    width: 100%;
+    max-width: 700px;
+    border-radius: 12px;
+    box-shadow: 1px 2px 5px rgba(42, 122, 42, 0.3);
+  }
+  #favoritosTitulo {
+    text-align: center;
+    color: #2a7a2a;
+    margin-bottom: 15px;
+  }
+  .obs-text {
+    font-style: italic;
+    color: #4a774a;
+    margin-top: 8px;
+  }
+  .remove-fav {
+    background: #cc4b4b;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background-color 0.3s ease;
+  }
+  .remove-fav:hover {
+    background: #992f2f;
+  }
+</style>
+</head>
+<body>
+
+<h1>Biblioteca Musical Moderna</h1>
+
+<input type="search" id="busca" placeholder="Buscar por música ou cantor..." autocomplete="off" />
+
+<audio id="player" controls></audio>
+
+<div id="listaMusicas"></div>
+
+<h2 id="favoritosTitulo">🎵 Músicas Favoritadas</h2>
+<div id="listaFavoritos"></div>
+
+<script>
+  const musicas = [
+    {
+      id: "001",
+      nome: "Acima",
+      cantor: "Eliezer Rodriguês",
+      url: "https://docs.google.com/uc?export=download&id=1sglXiAqCwgEkozOyEgqsn2mvJiDFm_V-"
+    },
+    {
+      id: "002",
+      nome: "Cheios",
+      cantor: "Eliezer Rodriguês",
+      url: "https://docs.google.com/uc?export=download&id=1g31yj-EYWCzGdo3dSMp5Bjn-hhfHQW7A"
+    }
+  ];
+
+  const player = document.getElementById('player');
+  const listaMusicasEl = document.getElementById('listaMusicas');
+  const listaFavoritosEl = document.getElementById('listaFavoritos');
+  const buscaInput = document.getElementById('busca');
+
+  // Recupera favoritos do localStorage
+  let favoritos = JSON.parse(localStorage.getItem('favoritosMusicas')) || {};
+
+  // Atualiza a lista das músicas com base na busca
+  function atualizarListaMusicas() {
+    const termo = buscaInput.value.trim().toLowerCase();
+    listaMusicasEl.innerHTML = '';
+
+    const filtradas = musicas.filter(m => {
+      return m.nome.toLowerCase().includes(termo) || m.cantor.toLowerCase().includes(termo);
+    });
+
+    if(filtradas.length === 0) {
+      listaMusicasEl.innerHTML = `<p style="text-align:center; color:#666;">Nenhuma música encontrada</p>`;
+      return;
+    }
+
+    filtradas.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'musica';
+
+      div.innerHTML = `
+        <div class="musica-info">
+          <p class="musica-nome">${m.nome}</p>
+          <p class="musica-cantor">${m.cantor}</p>
+        </div>
+        <button class="fav-btn">${favoritos[m.id] ? 'Favoritado' : 'Favoritar'}</button>
+      `;
+
+      div.querySelector('.musica-info').addEventListener('click', () => {
+        tocarMusica(m.id);
+      });
+
+      div.querySelector('.fav-btn').addEventListener('click', () => {
+        toggleFavorito(m.id);
+      });
+
+      listaMusicasEl.appendChild(div);
+    });
+  }
+
+  // Toca a música no player
+  function tocarMusica(id) {
+    const musica = musicas.find(m => m.id === id);
+    if(!musica) return;
+    player.src = musica.url;
+    player.play();
+  }
+
+  // Adiciona ou remove favorito
+  function toggleFavorito(id) {
+    if(favoritos[id]) {
+      delete favoritos[id];
+    } else {
+      const obs = prompt("Digite uma observação para esta música (opcional):", "");
+      favoritos[id] = obs || "";
+    }
+    salvarFavoritos();
+    atualizarListaMusicas();
+    atualizarListaFavoritos();
+  }
+
+  // Salva no localStorage
+  function salvarFavoritos() {
+    localStorage.setItem('favoritosMusicas', JSON.stringify(favoritos));
+  }
+
+  // Atualiza a lista de favoritos
+  function atualizarListaFavoritos() {
+    listaFavoritosEl.innerHTML = '';
+
+    const idsFavoritos = Object.keys(favoritos);
+    if(idsFavoritos.length === 0) {
+      listaFavoritosEl.innerHTML = `<p style="text-align:center; color:#666;">Você ainda não favoritou nenhuma música.</p>`;
+      return;
+    }
+
+    idsFavoritos.forEach(id => {
+      const musica = musicas.find(m => m.id === id);
+      if(!musica) return;
+
+      const div = document.createElement('div');
+      div.className = 'musica';
+
+      const obs = favoritos[id];
+      div.innerHTML = `
+        <div class="musica-info">
+          <p class="musica-nome">${musica.nome}</p>
+          <p class="musica-cantor">${musica.cantor}</p>
+          ${obs ? `<p class="obs-text">Observação: ${obs}</p>` : ''}
+        </div>
+        <button class="remove-fav">Remover</button>
+      `;
+
+      div.querySelector('.musica-info').addEventListener('click', () => {
+        tocarMusica(musica.id);
+      });
+
+      div.querySelector('.remove-fav').addEventListener('click', () => {
+        delete favoritos[musica.id];
+        salvarFavoritos();
+        atualizarListaFavoritos();
+        atualizarListaMusicas();
+      });
+
+      listaFavoritosEl.appendChild(div);
+    });
+  }
+
+  buscaInput.addEventListener('input', atualizarListaMusicas);
+
+  // Inicializa
+  atualizarListaMusicas();
+  atualizarListaFavoritos();
+</script>
+
+</body>
+</html>
