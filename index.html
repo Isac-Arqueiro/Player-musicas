@@ -33,20 +33,20 @@
 <div id="listaFavoritos"></div>
 
 <script>
-  let musicas = [];
+  const musicas = [
+    {
+      id: "001",
+      nome: "Acima",
+      cantor: "Eliezer Rodriguês",
+      url: "https://archive.org/download/acima-eliezer-rodrigues/Acima-Eliezer%20Rodrigues.mp3"
+    }
+  ];
+
   let favoritos = JSON.parse(localStorage.getItem('favoritosMusicas')) || {};
   const player = document.getElementById('player');
   const listaMusicasEl = document.getElementById('listaMusicas');
   const listaFavoritosEl = document.getElementById('listaFavoritos');
   const buscaInput = document.getElementById('busca');
-
-  fetch('musicas.json')
-    .then(res => res.json())
-    .then(data => {
-      musicas = data;
-      atualizarListaMusicas();
-      atualizarListaFavoritos();
-    });
 
   function atualizarListaMusicas() {
     const termo = buscaInput.value.trim().toLowerCase();
@@ -123,6 +123,8 @@
   }
 
   buscaInput.addEventListener('input', atualizarListaMusicas);
+  atualizarListaMusicas();
+  atualizarListaFavoritos();
 </script>
 
 </body>
